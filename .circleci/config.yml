@@ -1,52 +1,63 @@
 # my config
 version: 2.1
 orbs:
-  node: circleci/node@3.0.0
-  docker: circleci/docker@1.4.0
+    node: circleci/node@3.0.0
+    docker: circleci/docker@1.4.0
+    ts: hubci/tailscale@0.1
 
 jobs:
-  build-and-push:
-    environment:
-      DOCKER_IMAGE: nhtua/react-docker
-      DOCKER_TAG: latest
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - docker/check:
-          docker-username: DOCKER_USER
-          docker-password: DOCKER_PASSWORD
-      - docker/build:
-          image: $DOCKER_IMAGE
-          tag: $DOCKER_TAG
-      - docker/push:
-          digest-path: /tmp/digest.txt
-          image: $DOCKER_IMAGE
-          tag: $DOCKER_TAG
-      - run:
-          command: |
-            echo "Digest is: $(</tmp/digest.txt)"
-  deploy:
-    executor: docker/docker
-    steps:
-      # Please add $SSH_KEY_FINGERPRINT, $DEPLOYED_USER@ and DEPLOYED_SERVER to project's environment
-      - add_ssh_keys:
-          fingerprints:
-            - $SSH_KEY_FINGERPRINT
-      - run: ssh -oStrictHostKeyChecking=no $DEPLOYED_USER@$DEPLOYED_SERVER './deploy.sh'
+    build-and-push:
+        environment:
+            DOCKER_IMAGE: thanhmati/react-docker
+            DOCKER_TAG: latest
+        executor: docker/docker
+        steps:
+            - setup_remote_docker
+            - checkout
+            - docker/check:
+                  docker-username: DOCKER_USER
+                  docker-password: DOCKER_PASSWORD
+            - docker/build:
+                  image: $DOCKER_IMAGE
+                  tag: $DOCKER_TAG
+            - docker/push:
+                  digest-path: /tmp/digest.txt
+                  image: $DOCKER_IMAGE
+                  tag: $DOCKER_TAG
+            - run:
+                  command: |
+                      echo "Digest is: $(</tmp/digest.txt)"
+    deploy:
+        executor: docker/docker
+        parameters:
+            auth-key:
+                type: env_var_name
+                default: TS_AUTHKEY
+        steps:
+            - ts/install
+            - ts/connect
+            - run:
+                  name: Ping to server
+                  command: |
+                      curl "http://100.110.248.12"
+            # Please add $SSH_KEY_FINGERPRINT, $DEPLOYED_USER@ and DEPLOYED_SERVER to project's environment
+            - add_ssh_keys:
+                  fingerprints:
+                      - $SSH_KEY_FINGERPRINT
+            - run: ssh -oStrictHostKeyChecking=no -v thanhdo@100.110.248.12 './deploy.sh'
 
 workflows:
-  my-pipeline:
-    jobs:
-      - node/test
-      - build-and-push:
-          requires:
+    my-pipeline:
+        jobs:
             - node/test
-          filters:
-            branches:
-              only:
-                - master
-      # uncomment the 3 following lines to enable deploying
-      # - deploy:
-      #     requires:
-      #       - build-and-push
+            - build-and-push:
+                  requires:
+                      - node/test
+                  filters:
+                      branches:
+                          only:
+                              - master
+            # uncomment the 3 following lines to enable deploying
+            # - deploy:
+            #     requires:
+            #       - build-and-push

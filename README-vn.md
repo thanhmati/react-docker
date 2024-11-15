@@ -14,7 +14,7 @@ Demo này nhằm giúp các bạn hiểu cách đóng gói Docker Image cho mộ
 Chạy lệnh sau
 
 ```
-docker build -t nhtua/react-docker .
+docker build -t thanhmati/react-docker .
 ```
 
 Mình sẽ giải thích một chút về cách Dockerfile hoạt động.
@@ -37,8 +37,9 @@ Như vậy, chúng ta sử dụng Nginx để làm web server phục vụ ReactJ
 ## Triển khai react-docker lên server
 
 Có hai file chính:
-- `docker-compose.yaml` đây là file để khai báo cách chạy image react-docker
-- `deploy.sh` script này giúp triển khai image mới nhất của react-docker. Mỗi lần chạy nó sẽ xóa container hiện tại, tải về image mới nhất và chạy phiên bản mới lên.
+
+-   `docker-compose.yaml` đây là file để khai báo cách chạy image react-docker
+-   `deploy.sh` script này giúp triển khai image mới nhất của react-docker. Mỗi lần chạy nó sẽ xóa container hiện tại, tải về image mới nhất và chạy phiên bản mới lên.
 
 Cách chạy đơn giản như sau:
 
