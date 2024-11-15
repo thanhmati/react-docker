@@ -39,7 +39,7 @@ jobs:
             - run:
                   name: Ping to server
                   command: |
-                      curl "http://100.110.248.12"
+                      ping 100.110.248.12
             # Please add $SSH_KEY_FINGERPRINT, $DEPLOYED_USER@ and DEPLOYED_SERVER to project's environment
             - add_ssh_keys:
                   fingerprints:
